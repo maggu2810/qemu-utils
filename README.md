@@ -82,7 +82,7 @@ from http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133
 
 Execute this on the host system to copy the JDK to the ARM qemu system
 ```sh
-scp -P12022 stuff/jdk-8u101-linux-arm32-vfp-hflt.tar.gz alarm@127.0.0.1:/home/alarm
+scp -P50022 stuff/jdk-8u101-linux-arm32-vfp-hflt.tar.gz alarm@127.0.0.1:/home/alarm
 ```
 
 Extract the ARM JDK

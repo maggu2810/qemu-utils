@@ -100,13 +100,14 @@ my_cmd_run() {
    -dtb "${LCL_TMPDIR}/dtb" \
    -append "rw console=ttyAMA0,115200 root=/dev/mmcblk0" \
    -serial stdio \
-   -redir tcp:12022::22
+   -netdev user,id=mynet0,hostfwd=tcp::50022-:22,hostfwd=tcp::58080-:8080 \
+   -device virtio-net-device,netdev=mynet0,mac=52:54:00:fa:ce:14
 
   rm -rf "${LCL_TMPDIR}"
 }
 
 my_cmd_ssh() {
-  ssh -lalarm -p12022 127.0.0.1
+  ssh -lalarm -p50022 127.0.0.1
 }
 
 #
