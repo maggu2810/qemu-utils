@@ -96,7 +96,7 @@ Add Java to PATH
 export PATH="${PATH}":"${PWD}"/jdk1.8.0_101/bin
 ```
 
-## Test Karaf or something similar stuff
+## Test Karaf
 
 You need a Java VM installed (see methods above)...
 
@@ -122,3 +122,26 @@ cd apache-karaf-4.0.7
 tail -f data/log/karaf.log
 ```
 
+## Test openHAB
+
+You need a Java VM installed (see methods above)...
+
+Choose between offline and online distribution
+* offline `export OH_DIST=offline`
+* online  `export OH_DIST=online`
+
+Download openHAB
+```sh
+curl -O "https://openhab.ci.cloudbees.com/job/openHAB-Distribution/lastSuccessfulBuild/artifact/distributions/openhab-${OH_DIST}/target/openhab-${OH_DIST}-2.0.0-SNAPSHOT.tar.gz"
+```
+
+Extract openHAB (create oh directory and cleanup if already present before)
+```sh
+rm -rf oh; mkdir -p oh; cd oh
+tar xzf "../openhab-${OH_DIST}-2.0.0-SNAPSHOT.tar.gz"
+```
+
+Start openHAB (reside in oh directory)
+```sh
+./start.sh
+```
