@@ -135,13 +135,13 @@ Download openHAB
 curl -O "https://openhab.ci.cloudbees.com/job/openHAB-Distribution/lastSuccessfulBuild/artifact/distributions/openhab-${OH_DIST}/target/openhab-${OH_DIST}-2.0.0-SNAPSHOT.tar.gz"
 ```
 
-Extract openHAB (create oh directory and cleanup if already present before)
+Extract openHAB (create oh-dist spec. directory and cleanup if already present before)
 ```sh
-rm -rf oh; mkdir -p oh; cd oh
+rm -rf "${OH_DIST}"; mkdir -p "${OH_DIST}"; cd "${OH_DIST}"
 tar xzf "../openhab-${OH_DIST}-2.0.0-SNAPSHOT.tar.gz"
 ```
 
-Start openHAB (reside in oh directory)
+Start openHAB (reside in oh-dist spec. directory)
 ```sh
 ./start.sh
 ```
