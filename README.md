@@ -137,8 +137,9 @@ curl -O "https://openhab.ci.cloudbees.com/job/openHAB-Distribution/lastSuccessfu
 
 Extract openHAB (create oh-dist spec. directory and cleanup if already present before)
 ```sh
+mkdir -p oh; cd oh
 rm -rf "${OH_DIST}"; mkdir -p "${OH_DIST}"; cd "${OH_DIST}"
-tar xzf "../openhab-${OH_DIST}-2.0.0-SNAPSHOT.tar.gz"
+tar xzf "../../openhab-${OH_DIST}-2.0.0-SNAPSHOT.tar.gz"
 ```
 
 Start openHAB (reside in oh-dist spec. directory)
