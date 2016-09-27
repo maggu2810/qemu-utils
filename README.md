@@ -30,6 +30,21 @@ password: root
 
 # Examples
 
+## Install bauerbill
+
+Add the `xyne-any` repository (this should be done only once).
+```sh
+cat <<EOF >>/etc/pacman.conf
+[xyne-any]
+Server = http://xyne.archlinux.ca/repos/xyne
+EOF
+```
+
+Install bauerbill
+```sh
+pacman -Sy bauerbill
+```
+
 ## Test Karaf or something similar stuff
 
 On the host system:
@@ -50,7 +65,7 @@ scp -P12022 stuff/apache-karaf-4.0.7.tar.gz alarm@127.0.0.1:/home/alarm
 
 Connect to the ARM qemu system using SSH
 ```sh
-ssh -lalarm -p12022 127.0.0.1
+sh ctrl.sh ssh
 ```
 
 Extract the ARM JDK

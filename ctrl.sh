@@ -18,7 +18,7 @@ die() {
 # We rely on the following global environment variables:
 # * FS_IMG
 #
-create_img() {
+my_cmd_create_img() {
   local LCL_FS_IMG="${FS_IMG}"
 
   local LCL_TMPDIR="`mktemp -d`"
@@ -72,7 +72,7 @@ extract_resources() {
 # * FS_IMG
 # * MACHINE
 #
-run() {
+my_cmd_run() {
   local LCL_TMPDIR="`mktemp -d`"
 
   local LCL_ARCHIVE_PATH_KERNEL
@@ -105,9 +105,13 @@ run() {
   rm -rf "${LCL_TMPDIR}"
 }
 
+my_cmd_ssh() {
+  ssh -lalarm -p12022 127.0.0.1
+}
+
 #
 # Handle command line arguments
 #
 while [ "${#}" -gt 0 ]; do
-  "${1}"; shift
+  my_cmd_"${1}"; shift
 done
