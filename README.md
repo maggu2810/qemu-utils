@@ -30,10 +30,13 @@ password: root
 
 # Examples
 
-## Install bauerbill
+## AUR
+
+### Install bauerbill
 
 Add the `xyne-any` repository (this should be done only once).
 ```sh
+# root
 cat <<EOF >>/etc/pacman.conf
 [xyne-any]
 Server = http://xyne.archlinux.ca/repos/xyne
@@ -42,40 +45,64 @@ EOF
 
 Install bauerbill
 ```sh
+# root
 pacman -Sy bauerbill
 ```
 
-## Test Karaf or something similar stuff
+### Install base-devel
 
-On the host system:
-
-Download Karaf
 ```sh
-wget http://artfiles.org/apache.org/karaf/4.0.7/apache-karaf-4.0.7.tar.gz
+# root
+pacman -Sy --needed base-devel
 ```
+
+### Setup sudo
+
+You need to allow at least root privilege for user `alarm`.
+```sh
+# root
+visudo
+```
+
+### Oracle JDK
+
+This will need some time, be patient.
+```sh
+# user
+bb-wrapper -S --aur AUR/jdk-arm
+```
+
+## Oracle JDK (manually)
+
+__I would prefer to use the AUR method (see above).__
+But you can also extract a manually downloaded archive.
 
 Fetch the file jdk-8u101-linux-arm32-vfp-hflt.tar.gz
 from http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
-Execute this on the host system to copy the JDK and Karaf to the ARM qemu system
+Execute this on the host system to copy the JDK to the ARM qemu system
 ```sh
 scp -P12022 stuff/jdk-8u101-linux-arm32-vfp-hflt.tar.gz alarm@127.0.0.1:/home/alarm
-scp -P12022 stuff/apache-karaf-4.0.7.tar.gz alarm@127.0.0.1:/home/alarm
-```
-
-Connect to the ARM qemu system using SSH
-```sh
-sh ctrl.sh ssh
 ```
 
 Extract the ARM JDK
 ```sh
+# user
 tar xzf jdk-8u101-linux-arm32-vfp-hflt.tar.gz
 ```
 
 Add Java to PATH
 ```sh
 export PATH="${PATH}":"${PWD}"/jdk1.8.0_101/bin
+```
+
+## Test Karaf or something similar stuff
+
+You need a Java VM installed (see methods above)...
+
+Download Karaf
+```sh
+curl -O http://artfiles.org/apache.org/karaf/4.0.7/apache-karaf-4.0.7.tar.gz
 ```
 
 Extract Karaf
