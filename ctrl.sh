@@ -53,16 +53,22 @@ my_cmd_create_img() {
 # We don't rely on any global environment variables
 #
 extract_resources() {
-  local LCL_FS_IMG="${1}"; shift
-  local LCL_ARCHIVE_PATH_KERNEL="${1}"; shift
-  local LCL_ARCHIVE_PATH_DTB="${1}"; shift
   local LCL_DST_DIR="${1}"; shift
+  local LCL_FS_IMG="${1}"; shift
+
+  local LCL_DST
+  local LCL_SRC
 
   local LCL_TMPDIR="`mktemp -d`"
 
   sudo mount -o loop "${LCL_FS_IMG}" "${LCL_TMPDIR}"
-  cp -v "${LCL_TMPDIR}/${LCL_ARCHIVE_PATH_KERNEL}" "${LCL_DST_DIR}"/kernel
-  cp -v "${LCL_TMPDIR}/${LCL_ARCHIVE_PATH_DTB}" "${LCL_DST_DIR}"/dtb
+  while [ "${#}" -gt 0 ]; do
+    LCL_DST="${1}"; shift
+    LCL_SRC="${1}"; shift
+    if [ -n "${LCL_DST}" -a -n "${LCL_SRC}" ]; then
+      cp -v "${LCL_TMPDIR}/${LCL_SRC}" "${LCL_DST_DIR}/${LCL_DST}"
+    fi
+  done
   sudo umount "${LCL_TMPDIR}"
   rmdir "${LCL_TMPDIR}"
 }
@@ -82,53 +88,106 @@ my_cmd_run() {
   LCL_ARCHIVE_PATH_KERNEL=boot/zImage
   case "${MACHINE}" in
     vexpress-a9)
-      LCL_ARCHIVE_PATH_DTB=boot/dtbs/vexpress-v2p-ca9.dtb
-      LCL_QEMU_ARGS="${LCL_QEMU_ARGS} -drive file=${FS_IMG},id=rootfs.img,if=sd,format=raw,bus=0,unit=0"
+      # Extract the resources
+      extract_resources "${LCL_TMPDIR}" "${FS_IMG}" \
+        kernel "${LCL_ARCHIVE_PATH_KERNEL}" \
+        dtb boot/dtbs/vexpress-v2p-ca9.dtb
+
+      # Run QEMU
+      qemu-system-arm \
+       -machine type="${MACHINE}" \
+       -m 1G \
+       -drive file="${FS_IMG}",id=rootfs.img,if=sd,format=raw,bus=0,unit=0 \
+       -kernel "${LCL_TMPDIR}/kernel" \
+       -dtb "${LCL_TMPDIR}/dtb" \
+       -append "rw console=ttyAMA0,115200 root=/dev/mmcblk0" \
+       -serial stdio \
+       -netdev user,id=mynet0,hostfwd=tcp::50022-:22,hostfwd=tcp::58080-:8080 \
+       -device virtio-net-device,netdev=mynet0,mac=52:54:00:fa:ce:14
+
+      # This doesn't seem to work
+       #-smp cpus=4 -cpu cortex-a9 \
       ;;
     vexpress-a15)
-      #vexpress-v2p-ca15_a7.dtb
-      #vexpress-v2p-ca15-tc1.dtb
-      LCL_ARCHIVE_PATH_DTB=boot/dtbs/vexpress-v2p-ca15_a7.dtb
-      LCL_QEMU_ARGS="${LCL_QEMU_ARGS} -drive file=${FS_IMG},id=rootfs.img,if=sd,format=raw,bus=0,unit=0"
+      # vexpress-v2p-ca15_a7.dtb OR vexpress-v2p-ca15-tc1.dtb
+
+      # Extract the resources
+      extract_resources "${LCL_TMPDIR}" "${FS_IMG}" \
+        kernel "${LCL_ARCHIVE_PATH_KERNEL}" \
+        dtb boot/dtbs/vexpress-v2p-ca15_a7.dtb
+
+      # Run QEMU
+      qemu-system-arm \
+       -machine type="${MACHINE}" \
+       -smp cpus=1 \
+       -m 1G \
+       -drive file="${FS_IMG}",id=rootfs.img,if=sd,format=raw,bus=0,unit=0 \
+       -kernel "${LCL_TMPDIR}/kernel" \
+       -dtb "${LCL_TMPDIR}/dtb" \
+       -append "rw console=ttyAMA0,115200 root=/dev/mmcblk0" \
+       -serial stdio \
+       -netdev user,id=mynet0,hostfwd=tcp::50022-:22,hostfwd=tcp::58080-:8080 \
+       -device virtio-net-device,netdev=mynet0,mac=52:54:00:fa:ce:14
+
       # Doesn't seem to make any difference
-      #LCL_QEMU_ARGS="${LCL_QEMU_ARGS} -smp cpus=4"
+      # -smp cpus=4
       ;;
     raspi2)
       echo "${MACHINE} does not work ATM"
-      LCL_ARCHIVE_PATH_DTB=boot/dtbs/bcm2836-rpi-2-b.dtb
-      LCL_QEMU_ARGS="${LCL_QEMU_ARGS} -sd ${FS_IMG}"
+
+      # Extract the resources
+      extract_resources "${LCL_TMPDIR}" "${FS_IMG}" \
+        kernel "${LCL_ARCHIVE_PATH_KERNEL}" \
+        dtb boot/dtbs/bcm2836-rpi-2-b.dtb
+
+      # Run QEMU
+      qemu-system-arm \
+       -machine type="${MACHINE}" \
+       -smp cpus=1 \
+       -m 1G \
+       -drive file="${FS_IMG}",id=rootfs.img,if=sd,format=raw,bus=0,unit=0 \
+       -kernel "${LCL_TMPDIR}/kernel" \
+       -dtb "${LCL_TMPDIR}/dtb" \
+       -append "rw console=ttyAMA0,115200 root=/dev/mmcblk0" \
+       -serial stdio \
+       -redir tcp:12022::22 -redir tcp:58080::8080
+      ;;
+    sabrelite)
+      echo "${MACHINE} does not work ATM"
+
+      # Extract the resources
+      extract_resources "${LCL_TMPDIR}" "${FS_IMG}" \
+        kernel "${LCL_ARCHIVE_PATH_KERNEL}" \
+        dtb boot/dtbs/imx6q-sabrelite.dtb
+
+      # Run QEMU
+      qemu-system-arm \
+       -machine type="${MACHINE}" \
+       -smp cpus=1 \
+       -m 1G \
+       -drive file="${FS_IMG}",id=rootfs.img,if=sd,format=raw,bus=0,unit=0 \
+       -kernel "${LCL_TMPDIR}/kernel" \
+       -dtb "${LCL_TMPDIR}/dtb" \
+       -append "rw console=ttyAMA0,115200 root=/dev/mmcblk0" \
+       -serial stdio \
+       -redir tcp:12022::22 -redir tcp:58080::8080
       ;;
     virt)
       echo "${MACHINE} does not work ATM"
-      LCL_QEMU_ARGS="${LCL_QEMU_ARGS} -drive file=${FS_IMG},id=rootfs.img,if=sd,format=raw -device virtio-blk-pci,scsi=off,drive=rootfs.img,id=disk0"
+      LCL_QEMU_ARGS="${LCL_QEMU_ARGS} "\
+        "-drive file=${FS_IMG},id=rootfs.img,if=sd,format=raw " \
+        "-device virtio-blk-pci,drive=rootfs.img,id=disk0" \
+        "-device virtio-blk-device,drive=rootfs.img,id=disk1" \
+        "-device virtio-scsi-pci,drive=rootfs.img,id=disk2" \
+        "-device virtio-scsi-device,drive=rootfs.img,id=disk3" \
+        "-device ide-hd,drive=rootfs.img,id=disk4" \
+        "-device scsi-hd,drive=rootfs.img,id=disk5" \
+        ""
       ;;
     *)
       die "Unsupported machine: ${MACHINE}"
       ;;
   esac
-
-  if [ -n "${LCL_ARCHIVE_PATH_DTB}" ]; then
-    LCL_QEMU_ARGS="${LCL_QEMU_ARGS} -dtb ${LCL_TMPDIR}/dtb"
-  fi
-
-  # Extract the resources
-  extract_resources "${FS_IMG}" "${LCL_ARCHIVE_PATH_KERNEL}" "${LCL_ARCHIVE_PATH_DTB}" "${LCL_TMPDIR}"
-
-  # Run QEMU
-  qemu-system-arm \
-   -machine type="${MACHINE}" \
-   -m 1G \
-   -kernel "${LCL_TMPDIR}/kernel" \
-   ${LCL_QEMU_ARGS} \
-   -append "rw console=ttyAMA0,115200 root=/dev/mmcblk0 rootwait" \
-   -serial stdio \
-   -redir tcp:12022::22 -redir tcp:58080::8080
-
-if false; then
-   -sd "${FS_IMG}" \
-   -netdev user,id=mynet0,hostfwd=tcp::50022-:22,hostfwd=tcp::58080-:8080 \
-   -device virtio-net-device,netdev=mynet0,mac=52:54:00:fa:ce:14
-fi
 
   rm -rf "${LCL_TMPDIR}"
 }

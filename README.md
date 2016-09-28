@@ -146,3 +146,5 @@ Start openHAB (reside in oh-dist spec. directory)
 ```sh
 ./start.sh
 ```
+
+You can open the openHAB Web UI using the port `58080` on the host machine.
