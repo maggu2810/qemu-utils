@@ -32,6 +32,21 @@ password: root
 
 ## AUR
 
+### Install base-devel
+
+```sh
+# root
+pacman -Sy --needed base-devel
+```
+
+### Setup sudo
+
+You need to allow at least root privilege for user `alarm`.
+```sh
+# root
+visudo
+```
+
 ### Install bauerbill
 
 Add the `xyne-any` repository (this should be done only once).
@@ -47,21 +62,6 @@ Install bauerbill
 ```sh
 # root
 pacman -Sy bauerbill
-```
-
-### Install base-devel
-
-```sh
-# root
-pacman -Sy --needed base-devel
-```
-
-### Setup sudo
-
-You need to allow at least root privilege for user `alarm`.
-```sh
-# root
-visudo
 ```
 
 ### Oracle JDK
